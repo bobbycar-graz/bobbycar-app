@@ -107,22 +107,7 @@ private:
     QLowEnergyController::RemoteAddressType m_addressType = QLowEnergyController::PublicAddress;
     QLowEnergyController *m_control = nullptr;
     QLowEnergyService *m_service = nullptr;
-    QLowEnergyDescriptor m_notificationDescFrontVoltage;
-    QLowEnergyDescriptor m_notificationDescBackVoltage;
-    QLowEnergyDescriptor m_notificationDescFrontTemperature;
-    QLowEnergyDescriptor m_notificationDescBackTemperature;
-    QLowEnergyDescriptor m_notificationDescFrontLeftError;
-    QLowEnergyDescriptor m_notificationDescFrontRightError;
-    QLowEnergyDescriptor m_notificationDescBackLeftError;
-    QLowEnergyDescriptor m_notificationDescBackRightError;
-    QLowEnergyDescriptor m_notificationDescFrontLeftSpeed;
-    QLowEnergyDescriptor m_notificationDescFrontRightSpeed;
-    QLowEnergyDescriptor m_notificationDescBackLeftSpeed;
-    QLowEnergyDescriptor m_notificationDescBackRightSpeed;
-    QLowEnergyDescriptor m_notificationDescFrontLeftDcLink;
-    QLowEnergyDescriptor m_notificationDescFrontRightDcLink;
-    QLowEnergyDescriptor m_notificationDescBackLeftDcLink;
-    QLowEnergyDescriptor m_notificationDescBackRightDcLink;
+    QLowEnergyDescriptor m_notificationDescLivestats;
     DeviceInfo *m_currentDevice{};
 
     bool m_foundBobbycarService{};
