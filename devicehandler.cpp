@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QTimerEvent>
 
 // local includes
 #include "deviceinfo.h"
@@ -21,26 +22,6 @@ DeviceHandler::DeviceHandler(QObject *parent) :
     BluetoothBaseClass(parent),
     m_foundBobbycarService(false)
 {
-}
-
-void DeviceHandler::setAddressType(AddressType type)
-{
-    switch (type) {
-    case DeviceHandler::AddressType::PublicAddress:
-        m_addressType = QLowEnergyController::PublicAddress;
-        break;
-    case DeviceHandler::AddressType::RandomAddress:
-        m_addressType = QLowEnergyController::RandomAddress;
-        break;
-    }
-}
-
-DeviceHandler::AddressType DeviceHandler::addressType() const
-{
-    if (m_addressType == QLowEnergyController::RandomAddress)
-        return DeviceHandler::AddressType::RandomAddress;
-
-    return DeviceHandler::AddressType::PublicAddress;
 }
 
 void DeviceHandler::setDevice(DeviceInfo *device)
@@ -89,6 +70,110 @@ void DeviceHandler::setDevice(DeviceInfo *device)
     }
 }
 
+void DeviceHandler::setAddressType(AddressType type)
+{
+    switch (type) {
+    case DeviceHandler::AddressType::PublicAddress:
+        m_addressType = QLowEnergyController::PublicAddress;
+        break;
+    case DeviceHandler::AddressType::RandomAddress:
+        m_addressType = QLowEnergyController::RandomAddress;
+        break;
+    }
+}
+
+DeviceHandler::AddressType DeviceHandler::addressType() const
+{
+    if (m_addressType == QLowEnergyController::RandomAddress)
+        return DeviceHandler::AddressType::RandomAddress;
+
+    return DeviceHandler::AddressType::PublicAddress;
+}
+
+bool DeviceHandler::alive() const
+{
+    if (m_service)
+        return m_service->state() == QLowEnergyService::ServiceDiscovered;
+
+    return false;
+}
+
+void DeviceHandler::setRemoteControlActive(bool remoteControlActive)
+{
+    if (!remoteControlActive && m_timerId != -1)
+    {
+        killTimer(m_timerId);
+        m_timerId = -1;
+        emit remoteControlActiveChanged();
+
+        if (m_service && m_remotecontrolCharacteristic.isValid())
+        {
+            m_remoteControlFrontLeft = 0;
+            m_remoteControlFrontRight = 0;
+            m_remoteControlBackLeft = 0;
+            m_remoteControlBackRight = 0;
+
+            sendRemoteControl();
+        }
+    }
+    else if (remoteControlActive && m_timerId == -1 && m_service && m_remotecontrolCharacteristic.isValid())
+    {
+        m_timerId = startTimer(100);
+        emit remoteControlActiveChanged();
+    }
+}
+
+void DeviceHandler::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == m_timerId)
+    {
+        if (!m_service || !m_remotecontrolCharacteristic.isValid())
+        {
+            killTimer(m_timerId);
+            m_timerId = -1;
+            emit remoteControlActiveChanged();
+            return;
+        }
+
+        if (m_waitingForWrite)
+            qWarning() << "still pending";
+        else
+            sendRemoteControl();
+    }
+    else
+        BluetoothBaseClass::timerEvent(event);
+}
+
+void DeviceHandler::disconnectService()
+{
+    m_foundBobbycarService = false;
+
+    //disable notifications
+    if (m_service)
+    {
+        if (m_notificationDescLivestats.isValid() && m_notificationDescLivestats.value() == QByteArray::fromHex("0100"))
+            m_service->writeDescriptor(m_notificationDescLivestats, QByteArray::fromHex("0000"));
+
+        disconnectInternal();
+    }
+}
+
+void DeviceHandler::disconnectInternal()
+{
+    if (!m_notificationDescLivestats.isValid())
+    {
+        //disabled notifications -> assume disconnect intent
+        if (m_control)
+            m_control->disconnectFromDevice();
+
+        if (m_service)
+        {
+            delete m_service;
+            m_service = nullptr;
+        }
+    }
+}
+
 void DeviceHandler::serviceDiscovered(const QBluetoothUuid &gatt)
 {
     if (gatt == bobbycarServiceUuid)
@@ -118,6 +203,7 @@ void DeviceHandler::serviceScanDone()
         connect(m_service, &QLowEnergyService::stateChanged, this, &DeviceHandler::serviceStateChanged);
         connect(m_service, &QLowEnergyService::characteristicChanged, this, &DeviceHandler::updateBobbycarValue);
         connect(m_service, &QLowEnergyService::descriptorWritten, this, &DeviceHandler::confirmedDescriptorWrite);
+        connect(m_service, &QLowEnergyService::characteristicWritten, this, &DeviceHandler::confirmedCharacteristicWrite);
         m_service->discoverDetails();
     }
     else
@@ -126,23 +212,21 @@ void DeviceHandler::serviceScanDone()
     }
 }
 
-namespace {
-void logAddr(const QBluetoothUuid &uuid)
-{
-    if (uuid == bobbycarServiceUuid)
-        qDebug() << "bobbycarServiceUuid";
-    else if (uuid == livestatsCharacUuid)
-        qDebug() << "livestatsCharacUuid";
-    else if (uuid == remotecontrolCharacUuid)
-        qDebug() << "remotecontrolCharacUuid";
-    else
-        qDebug() << "unknown uuid" << uuid;
-}
-}
-
 void DeviceHandler::serviceStateChanged(QLowEnergyService::ServiceState s)
 {
-    switch (s) {
+    qDebug() << "serviceStateChanged()" << s;
+
+    if (m_timerId != -1)
+    {
+        killTimer(m_timerId);
+        m_timerId = -1;
+        emit remoteControlActiveChanged();
+    }
+
+    m_waitingForWrite = false;
+
+    switch (s)
+    {
     case QLowEnergyService::DiscoveringServices:
         setInfo(tr("Discovering services..."));
         break;
@@ -159,6 +243,13 @@ void DeviceHandler::serviceStateChanged(QLowEnergyService::ServiceState s)
         else
         {
             setError("livestatsCharacUuid not found.");
+            break;
+        }
+
+        m_remotecontrolCharacteristic = m_service->characteristic(remotecontrolCharacUuid);
+        if (!m_remotecontrolCharacteristic.isValid())
+        {
+            setError("remotecontrolCharacUuid not found.");
             break;
         }
 
@@ -186,6 +277,8 @@ void DeviceHandler::updateBobbycarValue(const QLowEnergyCharacteristic &c, const
             qWarning() << "could not parse livestats" << error.errorString();
             return;
         }
+
+        clearMessages();
 
         const QJsonObject &obj = doc.object();
 
@@ -253,40 +346,23 @@ void DeviceHandler::confirmedDescriptorWrite(const QLowEnergyDescriptor &d, cons
     }
 }
 
-void DeviceHandler::disconnectService()
+void DeviceHandler::confirmedCharacteristicWrite(const QLowEnergyCharacteristic &info, const QByteArray &value)
 {
-    m_foundBobbycarService = false;
+    qDebug() << "confirmedCharacteristicWrite";
 
-    //disable notifications
-    if (m_service)
-    {
-        if (m_notificationDescLivestats.isValid() && m_notificationDescLivestats.value() == QByteArray::fromHex("0100"))
-            m_service->writeDescriptor(m_notificationDescLivestats, QByteArray::fromHex("0000"));
-
-        disconnectInternal();
-    }
+    if (info == m_remotecontrolCharacteristic)
+        m_waitingForWrite = false;
 }
 
-void DeviceHandler::disconnectInternal()
+void DeviceHandler::sendRemoteControl()
 {
-    if (!m_notificationDescLivestats.isValid())
-    {
-        //disabled notifications -> assume disconnect intent
-        if (m_control)
-            m_control->disconnectFromDevice();
+    m_waitingForWrite = true;
 
-        if (m_service)
-        {
-            delete m_service;
-            m_service = nullptr;
-        }
-    }
-}
-
-bool DeviceHandler::alive() const
-{
-    if (m_service)
-        return m_service->state() == QLowEnergyService::ServiceDiscovered;
-
-    return false;
+    qDebug() << "writeCharacteristic()";
+    m_service->writeCharacteristic(m_remotecontrolCharacteristic, QJsonDocument{QJsonObject {
+        {"fl", m_remoteControlFrontLeft},
+        {"fr", m_remoteControlFrontRight},
+        {"bl", m_remoteControlBackLeft},
+        {"br", m_remoteControlBackRight}
+    }}.toJson(QJsonDocument::Compact));
 }

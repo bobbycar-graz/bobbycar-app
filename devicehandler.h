@@ -34,6 +34,12 @@ class DeviceHandler : public BluetoothBaseClass
     Q_PROPERTY(float backLeftDcLink READ backLeftDcLink NOTIFY backLeftDcLinkChanged);
     Q_PROPERTY(float backRightDcLink READ backRightDcLink NOTIFY backRightDcLinkChanged);
 
+    Q_PROPERTY(bool remoteControlActive READ remoteControlActive WRITE setRemoteControlActive NOTIFY remoteControlActiveChanged);
+    Q_PROPERTY(int remoteControlFrontLeft WRITE setRemoteControlFrontLeft);
+    Q_PROPERTY(int remoteControlFrontRight WRITE setRemoteControlFrontRight);
+    Q_PROPERTY(int remoteControlBackLeft WRITE setRemoteControlBackLeft);
+    Q_PROPERTY(int remoteControlBackRight WRITE setRemoteControlBackRight);
+
 public:
     enum class AddressType {
         PublicAddress,
@@ -66,6 +72,13 @@ public:
     float backLeftDcLink() const { return m_backLeftDcLink; }
     float backRightDcLink() const { return m_backRightDcLink; }
 
+    bool remoteControlActive() const { return m_timerId != -1; }
+    void setRemoteControlActive(bool remoteControlActive);
+    void setRemoteControlFrontLeft(int remoteControlFrontLeft) { m_remoteControlFrontLeft = remoteControlFrontLeft; }
+    void setRemoteControlFrontRight(int remoteControlFrontRight) { m_remoteControlFrontRight = remoteControlFrontRight; }
+    void setRemoteControlBackLeft(int remoteControlBackLeft) { m_remoteControlBackLeft = remoteControlBackLeft; }
+    void setRemoteControlBackRight(int remoteControlBackRight) { m_remoteControlBackRight = remoteControlBackRight; }
+
 signals:
     void aliveChanged();
 
@@ -86,6 +99,11 @@ signals:
     void backLeftDcLinkChanged();
     void backRightDcLinkChanged();
 
+    void remoteControlActiveChanged();
+
+protected:
+    void timerEvent(QTimerEvent *event) override;
+
 public slots:
     void disconnectService();
 
@@ -99,15 +117,20 @@ private:
     //QLowEnergyService
     void serviceStateChanged(QLowEnergyService::ServiceState s);
     void updateBobbycarValue(const QLowEnergyCharacteristic &c,
-                              const QByteArray &value);
+                             const QByteArray &value);
     void confirmedDescriptorWrite(const QLowEnergyDescriptor &d,
-                              const QByteArray &value);
+                                  const QByteArray &value);
+    void confirmedCharacteristicWrite(const QLowEnergyCharacteristic &info,
+                                      const QByteArray &value);
+
+    void sendRemoteControl();
 
 private:
     QLowEnergyController::RemoteAddressType m_addressType = QLowEnergyController::PublicAddress;
     QLowEnergyController *m_control = nullptr;
     QLowEnergyService *m_service = nullptr;
     QLowEnergyDescriptor m_notificationDescLivestats;
+    QLowEnergyCharacteristic m_remotecontrolCharacteristic;
     DeviceInfo *m_currentDevice{};
 
     bool m_foundBobbycarService{};
@@ -128,6 +151,15 @@ private:
     float m_frontRightDcLink{};
     float m_backLeftDcLink{};
     float m_backRightDcLink{};
+
+    int m_timerId{-1};
+
+    int m_remoteControlFrontLeft{};
+    int m_remoteControlFrontRight{};
+    int m_remoteControlBackLeft{};
+    int m_remoteControlBackRight{};
+
+    bool m_waitingForWrite{};
 };
 
 #endif // DEVICEHANDLER_H
