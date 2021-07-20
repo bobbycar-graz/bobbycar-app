@@ -15,16 +15,24 @@ class DeviceInfo;
 class DeviceHandler : public BluetoothBaseClass
 {
     Q_OBJECT
-
-    Q_PROPERTY(bool measuring READ measuring NOTIFY measuringChanged)
-    Q_PROPERTY(bool alive READ alive NOTIFY aliveChanged)
-    Q_PROPERTY(float speed READ speed NOTIFY statsChanged)
-    Q_PROPERTY(float maxSpeed READ maxSpeed NOTIFY statsChanged)
-    Q_PROPERTY(float minSpeed READ minSpeed NOTIFY statsChanged)
-    Q_PROPERTY(float avgSpeed READ avgSpeed NOTIFY statsChanged)
-    Q_PROPERTY(int time READ time NOTIFY statsChanged)
-    Q_PROPERTY(float distance READ distance NOTIFY statsChanged)
     Q_PROPERTY(AddressType addressType READ addressType WRITE setAddressType)
+    Q_PROPERTY(bool alive READ alive NOTIFY aliveChanged)
+    Q_PROPERTY(float frontVoltage READ frontVoltage NOTIFY frontVoltageChanged);
+    Q_PROPERTY(float backVoltage READ backVoltage NOTIFY backVoltageChanged);
+    Q_PROPERTY(float frontTemperature READ frontTemperature NOTIFY frontTemperatureChanged);
+    Q_PROPERTY(float backTemperature READ backTemperature NOTIFY backTemperatureChanged);
+    Q_PROPERTY(int frontLeftError READ frontLeftError NOTIFY frontLeftErrorChanged);
+    Q_PROPERTY(int frontRightError READ frontRightError NOTIFY frontRightErrorChanged);
+    Q_PROPERTY(int backLeftError READ backLeftError NOTIFY backLeftErrorChanged);
+    Q_PROPERTY(int backRightError READ backRightError NOTIFY backRightErrorChanged);
+    Q_PROPERTY(float frontLeftSpeed READ frontLeftSpeed NOTIFY frontLeftSpeedChanged);
+    Q_PROPERTY(float frontRightSpeed READ frontRightSpeed NOTIFY frontRightSpeedChanged);
+    Q_PROPERTY(float backLeftSpeed READ backLeftSpeed NOTIFY backLeftSpeedChanged);
+    Q_PROPERTY(float backRightSpeed READ backRightSpeed NOTIFY backRightSpeedChanged);
+    Q_PROPERTY(float frontLeftDcLink READ frontLeftDcLink NOTIFY frontLeftDcLinkChanged);
+    Q_PROPERTY(float frontRightDcLink READ frontRightDcLink NOTIFY frontRightDcLinkChanged);
+    Q_PROPERTY(float backLeftDcLink READ backLeftDcLink NOTIFY backLeftDcLinkChanged);
+    Q_PROPERTY(float backRightDcLink READ backRightDcLink NOTIFY backRightDcLinkChanged);
 
 public:
     enum class AddressType {
@@ -39,28 +47,51 @@ public:
     void setAddressType(AddressType type);
     AddressType addressType() const;
 
-    bool measuring() const;
     bool alive() const;
 
-    // Statistics
-    float speed() const { return m_currentValue; }
-    int time() const;
-    float avgSpeed() const { return m_avg; }
-    float maxSpeed() const { return m_max; }
-    float minSpeed() const { return m_min; }
-    float distance() const { return m_distance; }
+    float frontVoltage() const { return m_frontVoltage; }
+    float backVoltage() const { return m_backVoltage; }
+    float frontTemperature() const { return m_frontTemperature; }
+    float backTemperature() const { return m_backTemperature; }
+    int frontLeftError() const { return m_frontLeftError; }
+    int frontRightError() const { return m_frontRightError; }
+    int backLeftError() const { return m_backLeftError; }
+    int backRightError() const { return m_backRightError; }
+    float frontLeftSpeed() const { return m_frontLeftSpeed; }
+    float frontRightSpeed() const { return m_frontRightSpeed; }
+    float backLeftSpeed() const { return m_backLeftSpeed; }
+    float backRightSpeed() const { return m_backRightSpeed; }
+    float frontLeftDcLink() const { return m_frontLeftDcLink; }
+    float frontRightDcLink() const { return m_frontRightDcLink; }
+    float backLeftDcLink() const { return m_backLeftDcLink; }
+    float backRightDcLink() const { return m_backRightDcLink; }
 
 signals:
-    void measuringChanged();
     void aliveChanged();
-    void statsChanged();
+
+    void frontVoltageChanged();
+    void backVoltageChanged();
+    void frontTemperatureChanged();
+    void backTemperatureChanged();
+    void frontLeftErrorChanged();
+    void frontRightErrorChanged();
+    void backLeftErrorChanged();
+    void backRightErrorChanged();
+    void frontLeftSpeedChanged();
+    void frontRightSpeedChanged();
+    void backLeftSpeedChanged();
+    void backRightSpeedChanged();
+    void frontLeftDcLinkChanged();
+    void frontRightDcLinkChanged();
+    void backLeftDcLinkChanged();
+    void backRightDcLinkChanged();
 
 public slots:
-    void startMeasurement();
-    void stopMeasurement();
     void disconnectService();
 
 private:
+    void disconnectInternal();
+
     //QLowEnergyController
     void serviceDiscovered(const QBluetoothUuid &);
     void serviceScanDone();
@@ -73,24 +104,45 @@ private:
                               const QByteArray &value);
 
 private:
-    void addMeasurement(float value);
-
+    QLowEnergyController::RemoteAddressType m_addressType = QLowEnergyController::PublicAddress;
     QLowEnergyController *m_control = nullptr;
     QLowEnergyService *m_service = nullptr;
-    QLowEnergyDescriptor m_notificationDesc;
-    DeviceInfo *m_currentDevice = nullptr;
+    QLowEnergyDescriptor m_notificationDescFrontVoltage;
+    QLowEnergyDescriptor m_notificationDescBackVoltage;
+    QLowEnergyDescriptor m_notificationDescFrontTemperature;
+    QLowEnergyDescriptor m_notificationDescBackTemperature;
+    QLowEnergyDescriptor m_notificationDescFrontLeftError;
+    QLowEnergyDescriptor m_notificationDescFrontRightError;
+    QLowEnergyDescriptor m_notificationDescBackLeftError;
+    QLowEnergyDescriptor m_notificationDescBackRightError;
+    QLowEnergyDescriptor m_notificationDescFrontLeftSpeed;
+    QLowEnergyDescriptor m_notificationDescFrontRightSpeed;
+    QLowEnergyDescriptor m_notificationDescBackLeftSpeed;
+    QLowEnergyDescriptor m_notificationDescBackRightSpeed;
+    QLowEnergyDescriptor m_notificationDescFrontLeftDcLink;
+    QLowEnergyDescriptor m_notificationDescFrontRightDcLink;
+    QLowEnergyDescriptor m_notificationDescBackLeftDcLink;
+    QLowEnergyDescriptor m_notificationDescBackRightDcLink;
+    DeviceInfo *m_currentDevice{};
 
-    bool m_foundBobbycarService;
-    bool m_measuring;
-    float m_currentValue, m_min, m_max, m_sum;
-    float m_avg, m_distance;
+    bool m_foundBobbycarService{};
 
-    // Statistics
-    QDateTime m_start;
-    QDateTime m_stop;
-
-    QVector<float> m_measurements;
-    QLowEnergyController::RemoteAddressType m_addressType = QLowEnergyController::PublicAddress;
+    float m_frontVoltage{};
+    float m_backVoltage{};
+    float m_frontTemperature{};
+    float m_backTemperature{};
+    uint8_t m_frontLeftError{};
+    uint8_t m_frontRightError{};
+    uint8_t m_backLeftError{};
+    uint8_t m_backRightError{};
+    float m_frontLeftSpeed{};
+    float m_frontRightSpeed{};
+    float m_backLeftSpeed{};
+    float m_backRightSpeed;
+    float m_frontLeftDcLink{};
+    float m_frontRightDcLink{};
+    float m_backLeftDcLink{};
+    float m_backRightDcLink{};
 };
 
 #endif // DEVICEHANDLER_H

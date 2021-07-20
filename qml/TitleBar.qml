@@ -1,4 +1,4 @@
-import QtQuick 2.5
+import QtQuick 2.15
 
 Rectangle    {
     id: titleBar
@@ -8,7 +8,7 @@ Rectangle    {
     height: GameSettings.fieldHeight
     color: GameSettings.viewColor
 
-    property var __titles: ["CONNECT", "MEASURE", "STATS"]
+    property var __titles: ["CONNECT", "LIVEDATA", "REMOTECONTROL"]
     property int currentIndex: 0
 
     signal titleClicked(int index)

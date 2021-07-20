@@ -7,8 +7,9 @@
         <file>qml/App.qml</file>
         <file>qml/TitleBar.qml</file>
         <file>qml/Connect.qml</file>
-        <file>qml/Measure.qml</file>
-        <file>qml/Stats.qml</file>
+        <file>qml/Livedata.qml</file>
+        <file>qml/LivedataMotor.qml</file>
+        <file>qml/RemoteControl.qml</file>
         <file>qml/GameButton.qml</file>
         <file>qml/GamePage.qml</file>
         <file>qml/BottomLine.qml</file>

@@ -1,4 +1,4 @@
-import QtQuick 2.5
+import QtQuick 2.15
 import Shared 1.0
 
 GamePage {
@@ -57,7 +57,7 @@ GamePage {
                 anchors.fill: parent
                     onClicked: {
                         deviceFinder.connectToService(modelData.deviceAddress);
-                        app.showPage("Measure.qml")
+                        app.showPage("Livedata.qml")
                     }
                 }
 
