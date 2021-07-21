@@ -1,4 +1,5 @@
 import QtQuick 2.15
+import QtQuick.Controls 2.15
 
 GamePage {
     id: remoteControlPage
@@ -22,11 +23,10 @@ GamePage {
         radius: GameSettings.buttonRadius
         color: GameSettings.viewColor
 
-        property real maxSpeed: 100
-        property real remoteControlFrontLeft: maxSpeed * handler.relativeY * (handler.relativeX < 0 ? 1 + handler.relativeX : 1)
-        property real remoteControlFrontRight: maxSpeed * handler.relativeY * (handler.relativeX > 0 ? 1 - handler.relativeX : 1)
-        property real remoteControlBackLeft: 0
-        property real remoteControlBackRight: 0
+        property real remoteControlFrontLeft: (handler.relativeX * frontLeftRightSpinbox.value) + (handler.relativeY * frontUpDownSpinbox.value)
+        property real remoteControlFrontRight: (-handler.relativeX * frontLeftRightSpinbox.value) + (handler.relativeY * frontUpDownSpinbox.value)
+        property real remoteControlBackLeft: (handler.relativeX * backLeftRightSpinbox.value) + (handler.relativeY * backUpDownSpinbox.value)
+        property real remoteControlBackRight: (-handler.relativeX * backLeftRightSpinbox.value) + (handler.relativeY * backUpDownSpinbox.value)
 
         onRemoteControlFrontLeftChanged: deviceHandler.remoteControlFrontLeft = remoteControlFrontLeft
         onRemoteControlFrontRightChanged: deviceHandler.remoteControlFrontRight = remoteControlFrontRight
@@ -76,6 +76,45 @@ GamePage {
             }
 
             onActiveChanged: deviceHandler.remoteControlActive = handler.active
+        }
+    }
+
+    Grid {
+        anchors.top: container.bottom
+        anchors.left: container.left
+        anchors.right: container.right
+        columns: 2
+
+        SpinBox {
+            id: frontLeftRightSpinbox
+            value: 100
+            editable: true
+            from: 0
+            to: 1000
+        }
+
+        SpinBox {
+            id: frontUpDownSpinbox
+            value: 100
+            editable: true
+            from: 0
+            to: 1000
+        }
+
+        SpinBox {
+            id: backLeftRightSpinbox
+            value: 100
+            editable: true
+            from: 0
+            to: 1000
+        }
+
+        SpinBox {
+            id: backUpDownSpinbox
+            value: 100
+            editable: true
+            from: 0
+            to: 1000
         }
     }
 }
