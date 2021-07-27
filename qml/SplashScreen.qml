@@ -24,10 +24,20 @@ Item {
     }
 
     Image {
+        id: bobbycar
         anchors.centerIn: parent
         width: Math.min(parent.height, parent.width)*0.6
         height: GameSettings.heightForWidth(width, sourceSize)
         source: "images/logo.png"
+
+        SequentialAnimation{
+            id: bobbycarAnim
+            running: true
+            loops: Animation.Infinite
+            alwaysRunToEnd: true
+            PropertyAnimation { target: bobbycar; property: "scale"; to: 1.2; duration: 500; easing.type: Easing.InQuad }
+            PropertyAnimation { target: bobbycar; property: "scale"; to: 1.0; duration: 500; easing.type: Easing.OutQuad }
+        }
     }
 
     Timer {

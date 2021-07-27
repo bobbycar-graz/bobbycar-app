@@ -146,7 +146,7 @@ private:
     float m_frontLeftSpeed{};
     float m_frontRightSpeed{};
     float m_backLeftSpeed{};
-    float m_backRightSpeed;
+    float m_backRightSpeed{};
     float m_frontLeftDcLink{};
     float m_frontRightDcLink{};
     float m_backLeftDcLink{};

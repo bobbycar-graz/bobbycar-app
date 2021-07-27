@@ -124,26 +124,6 @@ GamePage {
                     font.pixelSize: GameSettings.mediumFontSize
                 }
 
-                Image {
-                    id: bobbycar
-                    //anchors.horizontalCenter: flickable.horizontalCenter
-                    //anchors.verticalCenter: flickable.bottom
-                    width: parent.width * 0.2
-                    height: width
-                    source: "images/logo.png"
-                    smooth: true
-                    antialiasing: true
-
-                    SequentialAnimation{
-                        id: bobbycarAnim
-                        running: deviceHandler.alive
-                        loops: Animation.Infinite
-                        alwaysRunToEnd: true
-                        PropertyAnimation { target: bobbycar; property: "scale"; to: 1.2; duration: 500; easing.type: Easing.InQuad }
-                        PropertyAnimation { target: bobbycar; property: "scale"; to: 1.0; duration: 500; easing.type: Easing.OutQuad }
-                    }
-                }
-
                 Row {
                     Label {
                         text: 'iMotMax:'
@@ -167,20 +147,6 @@ GamePage {
 
                     SpinBox {
                         value: 50
-                    }
-                }
-
-                Repeater {
-                    model: 20
-                    Text {
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        wrapMode: Text.WordWrap
-                        text: "Placeholder"
-                        //visible: deviceHandler.alive
-                        color: GameSettings.textColor
-                        minimumPixelSize: 10
-                        font.pixelSize: GameSettings.mediumFontSize
                     }
                 }
             }
