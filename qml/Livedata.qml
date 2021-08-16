@@ -126,6 +126,8 @@ GamePage {
                 }
 
                 Row {
+                    anchors.bottomMargin: 30
+                    spacing: 10
                     Label {
                         text: 'iMotMax:'
                         color: GameSettings.textColor
@@ -139,6 +141,7 @@ GamePage {
                 }
 
                 Row {
+                    spacing: 10
                     Label {
                         text: 'iDcMax:'
                         color: GameSettings.textColor
