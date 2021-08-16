@@ -16,6 +16,9 @@ const QBluetoothUuid bobbycarServiceUuid{QUuid::fromString(QStringLiteral("0335e
 
 const QBluetoothUuid livestatsCharacUuid{QUuid::fromString(QStringLiteral("a48321ea-329f-4eab-a401-30e247211524"))};
 const QBluetoothUuid remotecontrolCharacUuid{QUuid::fromString(QStringLiteral("4201def0-a264-43e6-946b-6b2d9612dfed"))};
+
+const QBluetoothUuid settingsSetterUuid{QUuid::fromString(QStringLiteral("4201def1-a264-43e6-946b-6b2d9612dfed"))};
+const QBluetoothUuid wifiListUuid{QUuid::fromString(QStringLiteral("4201def2-a264-43e6-946b-6b2d9612dfed"))};
 }
 
 DeviceHandler::DeviceHandler(QObject *parent) :
