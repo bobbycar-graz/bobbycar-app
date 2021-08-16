@@ -51,8 +51,8 @@ void DeviceFinder::addDevice(const QBluetoothDeviceInfo &device)
         auto info = new DeviceInfo(device);
         if(info->getName().contains("bobby")) { // Only add devices with "bobby" in device name to list; (filter)
             m_devices.append(info);
+            setInfo(tr("Low Energy device found. Scanning more..."));
         }
-        setInfo(tr("Low Energy device found. Scanning more..."));
 //! [devicediscovery-3]
         emit devicesChanged();
 //! [devicediscovery-4]
