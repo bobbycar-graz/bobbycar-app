@@ -1,14 +1,14 @@
-#ifndef DEVICEHANDLER_H
-#define DEVICEHANDLER_H
+#pragma once
 
-#include "bluetoothbaseclass.h"
-
+// Qt includes
 #include <QDateTime>
 #include <QTimer>
 #include <QVector>
-
 #include <QLowEnergyController>
 #include <QLowEnergyService>
+
+// local includes
+#include "bluetoothbaseclass.h"
 
 class DeviceInfo;
 
@@ -49,7 +49,7 @@ public:
 
     DeviceHandler(QObject *parent = nullptr);
 
-    void setDevice(DeviceInfo *device);
+    void setDevice(const QBluetoothDeviceInfo &device);
     void setAddressType(AddressType type);
     AddressType addressType() const;
 
@@ -131,7 +131,7 @@ private:
     QLowEnergyService *m_service = nullptr;
     QLowEnergyDescriptor m_notificationDescLivestats;
     QLowEnergyCharacteristic m_remotecontrolCharacteristic;
-    DeviceInfo *m_currentDevice{};
+    QBluetoothDeviceInfo m_currentDevice;
 
     bool m_foundBobbycarService{};
 
@@ -161,5 +161,3 @@ private:
 
     bool m_waitingForWrite{};
 };
-
-#endif // DEVICEHANDLER_H

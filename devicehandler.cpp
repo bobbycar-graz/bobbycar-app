@@ -27,7 +27,7 @@ DeviceHandler::DeviceHandler(QObject *parent) :
 {
 }
 
-void DeviceHandler::setDevice(DeviceInfo *device)
+void DeviceHandler::setDevice(const QBluetoothDeviceInfo &device)
 {
     clearMessages();
     m_currentDevice = device;
@@ -41,14 +41,12 @@ void DeviceHandler::setDevice(DeviceInfo *device)
     }
 
     // Create new controller and connect it if device available
-    if (m_currentDevice)
+    if (m_currentDevice.isValid())
     {
         // Make connections
-        //! [Connect-Signals-1]
-        m_control = QLowEnergyController::createCentral(m_currentDevice->getDevice(), this);
-        //! [Connect-Signals-1]
+        m_control = QLowEnergyController::createCentral(m_currentDevice, this);
         m_control->setRemoteAddressType(m_addressType);
-        //! [Connect-Signals-2]
+
         connect(m_control, &QLowEnergyController::serviceDiscovered,
                 this, &DeviceHandler::serviceDiscovered);
         connect(m_control, &QLowEnergyController::discoveryFinished,
@@ -69,13 +67,13 @@ void DeviceHandler::setDevice(DeviceInfo *device)
 
         // Connect
         m_control->connectToDevice();
-        //! [Connect-Signals-2]
     }
 }
 
 void DeviceHandler::setAddressType(AddressType type)
 {
-    switch (type) {
+    switch (type)
+    {
     case DeviceHandler::AddressType::PublicAddress:
         m_addressType = QLowEnergyController::PublicAddress;
         break;
@@ -351,6 +349,7 @@ void DeviceHandler::confirmedDescriptorWrite(const QLowEnergyDescriptor &d, cons
 
 void DeviceHandler::confirmedCharacteristicWrite(const QLowEnergyCharacteristic &info, const QByteArray &value)
 {
+    Q_UNUSED(value)
     qDebug() << "confirmedCharacteristicWrite";
 
     if (info == m_remotecontrolCharacteristic)

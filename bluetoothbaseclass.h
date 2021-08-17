@@ -1,6 +1,6 @@
-#ifndef BLUETOOTHBASECLASS_H
-#define BLUETOOTHBASECLASS_H
+#pragma once
 
+// Qt includes
 #include <QObject>
 
 class BluetoothBaseClass : public QObject
@@ -12,10 +12,10 @@ class BluetoothBaseClass : public QObject
 public:
     explicit BluetoothBaseClass(QObject *parent = nullptr);
 
-    QString error() const;
+    QString error() const { return m_error; }
     void setError(const QString& error);
 
-    QString info() const;
+    QString info() const { return m_info; }
     void setInfo(const QString& info);
 
     void clearMessages();
@@ -28,5 +28,3 @@ private:
     QString m_error;
     QString m_info;
 };
-
-#endif // BLUETOOTHBASECLASS_H

@@ -1,8 +1,12 @@
 import QtQuick 2.15
 import Shared 1.0
-
+import bobbycar 1.0
 
 GamePage {
+    DeviceFinder {
+        id: deviceFinder
+        handler: deviceHandler
+    }
 
     function init() {
         deviceFinder.startSearch()
@@ -49,7 +53,7 @@ GamePage {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.top: title.bottom
-            model: deviceFinder.devices
+            model: deviceFinder
             clip: true
 
             delegate: Rectangle {
@@ -61,15 +65,15 @@ GamePage {
                 MouseArea {
                 anchors.fill: parent
                     onClicked: {
-                        deviceFinder.connectToService(modelData.deviceAddress);
+                        deviceFinder.connectToService(deviceAddress);
                         app.showPage("Livedata.qml")
                     }
                 }
 
                 Text {
-                    id: device
+                    //id: device
                     font.pixelSize: GameSettings.smallFontSize
-                    text: modelData.deviceName
+                    text: deviceName
                     anchors.top: parent.top
                     anchors.topMargin: parent.height * 0.1
                     anchors.leftMargin: parent.height * 0.1
@@ -78,9 +82,9 @@ GamePage {
                 }
 
                 Text {
-                    id: deviceAddress
+                    //id: deviceAddress
                     font.pixelSize: GameSettings.smallFontSize
-                    text: modelData.deviceAddress
+                    text: deviceAddress
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: parent.height * 0.1
                     anchors.rightMargin: parent.height * 0.1

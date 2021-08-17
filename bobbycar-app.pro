@@ -12,7 +12,8 @@ HEADERS += \
     bluetoothbaseclass.h \
     settings.h
 
-SOURCES += main.cpp \
+SOURCES += \
+    main.cpp \
     connectionhandler.cpp \
     deviceinfo.cpp \
     devicefinder.cpp \
@@ -20,11 +21,16 @@ SOURCES += main.cpp \
     bluetoothbaseclass.cpp \
     settings.cpp
 
-RESOURCES += qml.qrc \
+RESOURCES += \
+    qml.qrc \
     images.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
+
+CONFIG += qmltypes
+QML_IMPORT_NAME = bobbycar
+QML_IMPORT_MAJOR_VERSION = 1
 
 DISTFILES += \
     android/AndroidManifest.xml \
