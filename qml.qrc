@@ -15,5 +15,6 @@
         <file>qml/BottomLine.qml</file>
         <file>qml/StatsLabel.qml</file>
         <file>qml/qmldir</file>
+        <file>qml/settings.qml</file>
     </qresource>
 </RCC>

@@ -23,11 +23,13 @@ Item {
         __currentIndex = lastPages.length-1;
     }
 
-    function showPage(name)
+    function showPage(name, index = -1)
     {
         lastPages.push(name)
         pageLoader.setSource(name)
-        __currentIndex = lastPages.length-1;
+        if(index === -1)
+        __currentIndex = lastPages.length-1
+        else __currentIndex = index
     }
 
     TitleBar {

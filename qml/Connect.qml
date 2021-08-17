@@ -1,7 +1,12 @@
 import QtQuick 2.15
 import Shared 1.0
 
+
 GamePage {
+
+    function init() {
+        deviceFinder.startSearch()
+    }
 
     errorMessage: deviceFinder.error
     infoMessage: deviceFinder.info

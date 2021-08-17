@@ -37,6 +37,7 @@ GamePage {
             contentHeight: contentColumn.height
             flickableDirection: Flickable.VerticalFlick
             clip: true
+            anchors.margins: 5
 
             Column {
                 id: contentColumn
@@ -68,7 +69,7 @@ GamePage {
                     wrapMode: Text.WordWrap
                     text: "Front: " + Number(deviceHandler.frontVoltage).toLocaleString(Qt.locale()) + "V / " + Number(deviceHandler.frontTemperature).toLocaleString(Qt.locale()) + "°C"
                     color: GameSettings.textColor
-                    minimumPixelSize: 10
+                    //minimumPixelSize: 10
                     font.pixelSize: GameSettings.mediumFontSize
                 }
 
@@ -120,11 +121,13 @@ GamePage {
                     text: "Back: " + Number(deviceHandler.backVoltage).toLocaleString(Qt.locale()) + "V / " + Number(deviceHandler.backTemperature).toLocaleString(Qt.locale()) + "°C"
                     //visible: deviceHandler.alive
                     color: GameSettings.textColor
-                    minimumPixelSize: 10
+                    //minimumPixelSize: 10
                     font.pixelSize: GameSettings.mediumFontSize
                 }
 
                 Row {
+                    anchors.bottomMargin: 30
+                    spacing: 10
                     Label {
                         text: 'iMotMax:'
                         color: GameSettings.textColor
@@ -138,6 +141,7 @@ GamePage {
                 }
 
                 Row {
+                    spacing: 10
                     Label {
                         text: 'iDcMax:'
                         color: GameSettings.textColor
@@ -153,22 +157,45 @@ GamePage {
         }
     }
 
-    GameButton {
-        id: startButton
-        anchors.horizontalCenter: parent.horizontalCenter
+    Row {
+        id: buttonRow
         anchors.bottom: parent.bottom
         anchors.bottomMargin: GameSettings.fieldMargin
-        width: container.width
-        height: GameSettings.fieldHeight
-        radius: GameSettings.buttonRadius
+        spacing: 5
+        anchors.horizontalCenter: parent.horizontalCenter
 
-        onClicked: app.showPage("RemoteControl.qml")
+        width: childrenRect.width
 
-        Text {
-            anchors.centerIn: parent
-            font.pixelSize: GameSettings.tinyFontSize
-            text: qsTr("REMOTE")
-            color: startButton.enabled ? GameSettings.textColor : GameSettings.disabledTextColor
+        GameButton {
+            id: startButton
+            width: container.width / 2
+            height: GameSettings.fieldHeight
+            radius: GameSettings.buttonRadius
+
+            onClicked: app.showPage("RemoteControl.qml")
+
+            Text {
+                anchors.centerIn: parent
+                font.pixelSize: GameSettings.tinyFontSize
+                text: qsTr("REMOTE")
+                color: startButton.enabled ? GameSettings.textColor : GameSettings.disabledTextColor
+            }
+        }
+
+        GameButton {
+            id: settingsButton
+            width: container.width / 2
+            height: GameSettings.fieldHeight
+            radius: GameSettings.buttonRadius
+
+            onClicked: app.showPage("settings.qml", 3)
+
+            Text {
+                anchors.centerIn: parent
+                font.pixelSize: GameSettings.tinyFontSize
+                text: qsTr("SETTINGS")
+                color: settingsButton.enabled ? GameSettings.textColor : GameSettings.disabledTextColor
+            }
         }
     }
 }
