@@ -52,7 +52,7 @@ void DeviceHandler::setDevice(const QBluetoothDeviceInfo &device)
         connect(m_control, &QLowEnergyController::discoveryFinished,
                 this, &DeviceHandler::serviceScanDone);
 
-        connect(m_control, static_cast<void (QLowEnergyController::*)(QLowEnergyController::Error)>(&QLowEnergyController::error),
+        connect(m_control, static_cast<void (QLowEnergyController::*)(QLowEnergyController::Error)>(&QLowEnergyController::errorOccurred),
                 this, [this](QLowEnergyController::Error error) {
             Q_UNUSED(error);
             setError("Cannot connect to remote device.");
@@ -228,7 +228,7 @@ void DeviceHandler::serviceStateChanged(QLowEnergyService::ServiceState s)
 
     switch (s)
     {
-    case QLowEnergyService::DiscoveringServices:
+    case QLowEnergyService::RemoteServiceDiscovering:
         setInfo(tr("Discovering services..."));
         break;
     case QLowEnergyService::ServiceDiscovered:
@@ -237,7 +237,7 @@ void DeviceHandler::serviceStateChanged(QLowEnergyService::ServiceState s)
 
         if (const QLowEnergyCharacteristic hrChar = m_service->characteristic(livestatsCharacUuid); hrChar.isValid())
         {
-            m_notificationDescLivestats = hrChar.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
+            m_notificationDescLivestats = hrChar.descriptor(QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration);
             if (m_notificationDescLivestats.isValid())
                 m_service->writeDescriptor(m_notificationDescLivestats, QByteArray::fromHex("0100"));
         }
